@@ -13,7 +13,7 @@ Este projeto apresenta um laboratório prático em **formato HTML** para simula�
 
 ## 🌐 Acesse o Guia
 
-📎 [Clique aqui para visualizar o guia online](https://esparta009boy.github.io/Guia_DoS/)
+📎 [Clique aqui para visualizar o guia online](https://github.com/Esparta009boy/Guia_DoS.git)
 
 ---
 
@@ -48,4 +48,5 @@ Este projeto apresenta um laboratório prático em **formato HTML** para simula�
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/Esparta009boy/Guia_DoS.git
+   https://github.com/Esparta009boy/Guia_DoS.git
+
