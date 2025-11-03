@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LABORATÓRIO DE ATAQUE DoS COM SLOWLORIS</title>
+    <!-- Carrega Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega Chart.js para gráficos modernos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Configuração de fonte global e cor de fundo escura */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Cor de fundo escura (quase preta) */
+            color: #e2e8f0; /* Cor do texto clara */
+        }
+        /* Estilo para blocos de código (similar a um terminal) */
+        .code-block {
+            background-color: #2d3748; /* Fundo cinza escuro para código */
+            color: #68d391; /* Texto verde neon para comandos */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'monospace';
+            overflow-x: auto;
+            border-left: 4px solid #48bb78; /* Barra lateral verde para destaque */
+        }
+        .section-card {
+            background-color: #242c38; /* Fundo levemente mais claro que o body */
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .step-number {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            background-color: #48bb78; /* Cor de destaque (verde) */
+            color: #1a202c;
+            font-weight: 700;
+        }
+        .heading-icon {
+            color: #fc8181; /* Destaque vermelho para ícones de ataque/perigo */
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <header class="text-center mb-12 py-8 bg-gray-800 rounded-xl shadow-2xl">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-2 tracking-tight">
+            <span class="heading-icon">🧪</span> LABORATÓRIO DE ATAQUE DoS (SLOWLORIS)
+        </h1>
+        <p class="text-xl sm:text-2xl font-light text-gray-400">
+            Guia de Execução e Mitigação – INTENSIFICADO
+        </p>
+        <p class="text-sm italic text-gray-500 mt-4">By Ronaldo Rozendo</p>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto space-y-12">
+
+        <!-- Seção 1: Preparação e Setup do Alvo (Apache) -->
+        <section class="section-card">
+            <h2 class="text-3xl font-bold text-teal-400 mb-6 border-b border-teal-600 pb-2">
+                <span class="mr-2">🔧</span> 1. PREPARAÇÃO DO AMBIENTE (ALVO)
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Coluna 1: Comandos de Setup -->
+                <div class="space-y-4">
+                    <!-- Passo 1 & 2 -->
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0">1</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Atualizar o sistema e instalar o Apache</p>
+                            <div class="code-block">
+                                <p>sudo apt update</p>
+                                <p>sudo apt install apache2 -y</p>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1">Instala o servidor web Apache e confirma a instalação.</p>
+                        </div>
+                    </div>
+                    <!-- Passo 3 & 4 -->
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0">2</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Criar página de teste e Reiniciar</p>
+                            <div class="code-block">
+                                <p>echo "<h1>Bem-vindo ao Lab DoS</h1>" | sudo tee /var/www/html/index.html</p>
+                                <p>sudo systemctl restart apache2</p>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1">Cria o alvo e garante que o Apache está ativo.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Configuração do Timeout (Vulnerabilidade) -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-red-400 mb-3">Aumentar Timeout (Para Simular Vulnerabilidade)</h3>
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number bg-red-500 flex-shrink-0">3</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Aumentar o Timeout do Apache para 700 segundos</p>
+                            <div class="code-block text-yellow-400">
+                                <p>sudo nano /etc/apache2/apache2.conf</p>
+                                <p class="text-gray-300">// Localize e altere:</p>
+                                <p class="text-red-300">Timeout 300</p>
+                                <p class="text-green-300">Timeout 700</p>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1">Permite que o Slowloris mantenha conexões inativas por mais tempo, aumentando a eficácia do ataque.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0">4</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Reiniciar e Verificar o Apache</p>
+                            <div class="code-block">
+                                <p>sudo systemctl restart apache2</p>
+                                <p>sudo systemctl status apache2</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 2: Simulação do Ataque Slowloris -->
+        <section class="section-card">
+            <h2 class="text-3xl font-bold text-red-400 mb-6 border-b border-red-600 pb-2">
+                <span class="heading-icon">💣</span> 2. SIMULAÇÃO DO ATAQUE DoS COM SLOWLORIS
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Coluna 1: Execução -->
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0 bg-red-500">7</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Instalar e Executar o Ataque</p>
+                            <div class="code-block">
+                                <p>sudo apt install slowloris -y</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0 bg-red-500">8</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Executar o ataque com 1500 sockets</p>
+                            <div class="code-block">
+                                <p>slowloris localhost -p 80 -s 1500 -v</p>
+                            </div>
+                            <ul class="text-sm text-gray-400 list-disc list-inside mt-2">
+                                <li><code>-s 1500</code>: 1500 sockets simultâneos, agressivo.</li>
+                                <li><code>-v</code>: Modo verboso, exibe detalhes em tempo real.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0">9</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Encerrar o Ataque</p>
+                            <div class="code-block text-white">
+                                <p>Pressione <span class="text-red-500">Ctrl+C</span> no terminal do Slowloris.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Monitoramento -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-blue-400 mb-3">Monitoramento e Verificação</h3>
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0 bg-blue-500">9</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Monitorar Conexões em Outro Terminal</p>
+                            <div class="code-block">
+                                <p>sudo netstat -anp | grep :80</p>
+                                <p>// Para monitoramento contínuo (atualiza a cada 1s):</p>
+                                <p>watch -n 1 "netstat -anp | grep :80"</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0">10</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Testar Disponibilidade (Downtime)</p>
+                            <p class="text-gray-400">Acesse novamente <code>http://localhost</code>. Se o ataque for bem-sucedido, a página deve falhar ou demorar para carregar (Erro 503 Service Unavailable).</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="step-number flex-shrink-0 bg-teal-500">12</span>
+                        <div>
+                            <p class="font-semibold text-lg mb-1">Restauração Final</p>
+                            <p class="text-gray-400">Restaurar o Timeout original (300) e reiniciar o Apache.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 3: Análise e Mitigação (Blue Team) -->
+        <section class="section-card">
+            <h2 class="text-3xl font-bold text-green-400 mb-6 border-b border-green-600 pb-2">
+                <span class="mr-2">🛡️</span> 3. VISÃO GERAL E MITIGAÇÃO (BLUE TEAM)
+            </h2>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Coluna 1: Características e Entendimento -->
+                <div class="lg:col-span-1 space-y-4">
+                    <h3 class="text-xl font-bold text-gray-200">Visão Geral e Características</h3>
+                    <p class="text-gray-400">O Slowloris é um ataque de negação de serviço (DoS) de **baixo tráfego** que visa esgotar os recursos de conexão do servidor. Ele mantém conexões abertas enviando cabeçalhos HTTP incompletos em intervalos lentos.</p>
+                    <ul class="text-gray-300 list-disc list-inside">
+                        <li><span class="text-red-400 font-semibold">Silencioso:</span> Difícil de detectar por volume.</li>
+                        <li><span class="text-red-400 font-semibold">Exaustão:</span> Ocupa slots de conexão do servidor.</li>
+                        <li><span class="text-red-400 font-semibold">Eficácia:</span> Alta contra servidores com `Timeout` alto.</li>
+                    </ul>
+                </div>
+
+                <!-- Coluna 2: Mitigação e Configuração -->
+                <div class="lg:col-span-1 space-y-4">
+                    <h3 class="text-xl font-bold text-gray-200">Correções e Medidas de Mitigação</h3>
+                    <ul class="text-gray-300 list-disc list-inside">
+                        <li><span class="text-green-400 font-semibold">Timeout Baixo:</span> Reduzir o `Timeout` para 5-10 segundos.</li>
+                        <li><span class="text-green-400 font-semibold">Rate Limiting:</span> Usar Nginx ou HAProxy para limitar requisições por IP.</li>
+                        <li><span class="text-green-400 font-semibold">Módulos Apache:</span> Usar <code>mod_reqtimeout</code> ou <code>mod_evasive</code>.</li>
+                        <li><span class="text-green-400 font-semibold">WAF:</span> Implementar um Web Application Firewall (ModSecurity).</li>
+                        <li><span class="text-green-400 font-semibold">KeepAlive:</span> Manter o <code>KeepAliveTimeout</code> baixo.</li>
+                    </ul>
+                </div>
+
+                <!-- Coluna 3: Gráfico de Impacto do Timeout -->
+                <div class="lg:col-span-1 p-4 bg-gray-800 rounded-lg shadow-inner">
+                    <h3 class="text-xl font-bold text-gray-200 mb-2">Impacto do Timeout (Gráfico)</h3>
+                    <canvas id="timeoutChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabela: Playbook de Resposta a Incidente -->
+            <div class="mt-8">
+                <h3 class="text-2xl font-bold text-blue-400 mb-3">📋 Playbook de Resposta a Incidente (Slowloris)</h3>
+                <div class="overflow-x-auto rounded-lg shadow-xl">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Etapa</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Ação</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Responsável</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Ferramentas</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-gray-800 divide-y divide-gray-700">
+                            <tr class="hover:bg-gray-700 transition duration-150">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-red-300">1. Detecção</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-300">Identificar aumento de conexões persistentes/incompletas.</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">SOC Analyst</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">SIEM, Netstat, IDS</td>
+                            </tr>
+                            <tr class="hover:bg-gray-700 transition duration-150">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-orange-300">2. Validação</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-300">Confirmar cabeçalhos HTTP incompletos (maliciosos).</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">SOC Analyst</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">Wireshark, tcpdump</td>
+                            </tr>
+                            <tr class="hover:bg-gray-700 transition duration-150">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-yellow-300">3. Contenção</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-300">Bloquear IPs ofensores temporariamente.</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">Firewall Admin</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">Firewall, Fail2Ban</td>
+                            </tr>
+                            <tr class="hover:bg-gray-700 transition duration-150">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-green-300">4. Erradicação</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-300">Ajustar configurações (Timeout, Rate Limiting, WAF).</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">SysAdmin / DevOps</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-400">Apache/Nginx configs</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 4: Gráfico de Mitigação em Camadas -->
+        <section class="section-card">
+            <h2 class="text-3xl font-bold text-purple-400 mb-6 border-b border-purple-600 pb-2">
+                <span class="mr-2">📐</span> 4. ESTRATÉGIAS DE DEFESA EM CAMADAS
+            </h2>
+            <div class="p-4 bg-gray-800 rounded-lg shadow-inner">
+                <h3 class="text-xl font-bold text-gray-200 mb-2">Eficácia das Camadas de Mitigação</h3>
+                <canvas id="mitigationChart"></canvas>
+            </div>
+        </section>
+        
+        <!-- NOVA SEÇÃO 5: Entendimento por Perfil de Segurança -->
+        <section class="section-card">
+            <h2 class="text-3xl font-bold text-yellow-400 mb-6 border-b border-yellow-600 pb-2">
+                <span class="mr-2">🧠</span> 5. ANÁLISE POR PERFIL (RED TEAM vs. BLUE TEAM)
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- RED TEAM / PENTESTER -->
+                <div>
+                    <h3 class="text-2xl font-bold text-red-400 mb-3 flex items-center">
+                        <span class="mr-2">🔴</span> Pentester (Red Team)
+                    </h3>
+                    <p class="text-gray-300 mb-4">O Slowloris é uma ferramenta útil para testar a resiliência de servidores web contra ataques de exaustão de conexões, simulando um cliente malicioso com requisições lentas e incompletas.</p>
+                    <p class="font-semibold text-gray-200 mb-2">Em um teste de intrusão, o pentester avalia:</p>
+                    <ul class="text-gray-400 list-disc list-inside space-y-1 ml-4">
+                        <li>Limites de conexão por IP do servidor.</li>
+                        <li>Presença de Timeouts agressivos para conexões lentas.</li>
+                        <li>Existência de proteções como WAF, <code>mod_evasive</code> ou Reverse Proxies.</li>
+                    </ul>
+                    <p class="font-semibold text-red-300 mt-4">Resumo Prático:</p>
+                    <p class="text-gray-400">Usa o Slowloris para causar lentidão/falha (erro 503) e documenta as vulnerabilidades de mitigação.</p>
+                </div>
+
+                <!-- BLUE TEAM / SOC ANALYST -->
+                <div>
+                    <h3 class="text-2xl font-bold text-blue-400 mb-3 flex-items-center">
+                        <span class="mr-2">🔵</span> SOC Analyst (Blue Team)
+                    </h3>
+                    <p class="text-gray-300 mb-4">Por ser um ataque silencioso e de baixa taxa, o Slowloris dificulta a detecção por sistemas baseados em volume de tráfego, exigindo monitoramento comportamental.</p>
+                    <p class="font-semibold text-gray-200 mb-2">O analista deve monitorar:</p>
+                    <ul class="text-gray-400 list-disc list-inside space-y-1 ml-4">
+                        <li>Picos de uso de sockets sem aumento proporcional de tráfego.</li>
+                        <li>Conexões persistentes e incompletas nas portas 80/443.</li>
+                        <li>Padrões de cabeçalhos HTTP incompletos.</li>
+                    </ul>
+                    <p class="font-semibold text-blue-300 mt-4">A Resposta envolve:</p>
+                    <ul class="text-gray-400 list-disc list-inside space-y-1 ml-4">
+                        <li>Bloqueio de IPs ofensores (Contenção).</li>
+                        <li>Ajuste de configurações no servidor (<code>Timeout</code>, <code>KeepAlive</code>).</li>
+                        <li>Aplicação de Rate Limiting e Timeouts agressivos (Erradicação).</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+
+    </main>
+
+    <footer class="text-center mt-12 py-6 text-gray-500 border-t border-gray-700">
+        <p>© Laboratório de Segurança Ofensiva e Defensiva.</p>
+    </footer>
+
+    <script>
+        // Inicialização dos Gráficos Chart.js
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Gráfico 1: Impacto do Timeout na Eficácia do Slowloris
+            const ctx1 = document.getElementById('timeoutChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Timeout Baixo (5s)', 'Timeout Padrão (300s)', 'Timeout Alto (700s)'],
+                    datasets: [{
+                        label: 'Eficácia do Ataque Slowloris',
+                        data: [10, 50, 95], // Valores fictícios
+                        backgroundColor: [
+                            'rgba(74, 222, 128, 0.6)', // Verde (Baixa eficácia)
+                            'rgba(251, 191, 36, 0.6)', // Amarelo (Média eficácia)
+                            'rgba(248, 113, 113, 0.6)'  // Vermelho (Alta eficácia)
+                        ],
+                        borderColor: [
+                            'rgba(74, 222, 128, 1)',
+                            'rgba(251, 191, 36, 1)',
+                            'rgba(248, 113, 113, 1)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Eficácia do Ataque vs. Configuração de Timeout',
+                            color: '#e2e8f0'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Eficácia (%)',
+                                color: '#a0aec0'
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#a0aec0' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0aec0' }
+                        }
+                    }
+                }
+            });
+
+
+            // Gráfico 2: Eficácia das Camadas de Mitigação (Gráfico de Radar)
+            const ctx2 = document.getElementById('mitigationChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'radar',
+                data: {
+                    labels: ['Rate Limiting (Nginx/HAProxy)', 'WAF (ModSecurity)', 'Timeout Baixo', 'Módulos Apache (mod_evasive)', 'Monitoramento de Conexões'],
+                    datasets: [{
+                        label: 'Nível de Proteção',
+                        data: [90, 85, 95, 75, 80], // Valores fictícios de 0-100
+                        backgroundColor: 'rgba(147, 51, 234, 0.3)', // Roxo claro
+                        borderColor: 'rgba(147, 51, 234, 1)', // Roxo escuro
+                        pointBackgroundColor: 'rgba(147, 51, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(147, 51, 234, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    elements: {
+                        line: {
+                            tension: 0.1
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            pointLabels: {
+                                color: '#e2e8f0'
+                            },
+                            ticks: {
+                                display: false,
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
